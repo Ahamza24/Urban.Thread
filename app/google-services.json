@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "424499057157",
+    "project_id": "urban-threads-13a11",
+    "storage_bucket": "urban-threads-13a11.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424499057157:android:90b463388fe27510cf026c",
+        "android_client_info": {
+          "package_name": "com.urbanthreads.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCYMb8l3wON_ygxsoeM0UDi4htpnWZeCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

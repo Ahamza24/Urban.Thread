@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.urbanthreads.app.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_uploadFragment"
+            app:destination="@id/uploadFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_designDetailFragment"
+            app:destination="@id/designDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/designDetailFragment"
+        android:name="com.urbanthreads.app.DesignDetailFragment"
+        android:label="Design Detail"
+        tools:layout="@layout/fragment_design_detail">
+        <argument
+            android:name="design"
+            app:argType="com.urbanthreads.app.Design" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/uploadFragment"
+        android:name="com.urbanthreads.app.UploadFragment"
+        android:label="Upload"
+        tools:layout="@layout/fragment_upload" />
+
+    <fragment
+        android:id="@+id/tailorDetailFragment"
+        android:name="com.urbanthreads.app.TailorDetailFragment"
+        android:label="Tailor Detail"
+        tools:layout="@layout/fragment_tailor_detail">
+        <argument
+            android:name="tailor"
+            app:argType="com.urbanthreads.app.models$User" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.urbanthreads.app.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/activity_tailor_profile" />
+
+</navigation>
