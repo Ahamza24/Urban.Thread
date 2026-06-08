@@ -26,7 +26,7 @@ import java.util.UUID;
 public class UploadFragment extends Fragment {
 
     private ImageView imagePreview;
-    private EditText etTitle, etCategory, etTags;
+    private EditText etTitle, etDescription, etTags;
     private Button btnSelectImage, btnUpload;
     private android.widget.ProgressBar progressBar;
 
@@ -58,14 +58,14 @@ public class UploadFragment extends Fragment {
 
         imagePreview = view.findViewById(R.id.imagePreview);
         etTitle = view.findViewById(R.id.etTitle);
-        etCategory = view.findViewById(R.id.etCategory);
+        etDescription = view.findViewById(R.id.etDescription);
         etTags = view.findViewById(R.id.etTags);
         btnSelectImage = view.findViewById(R.id.btnSelectImage);
         btnUpload = view.findViewById(R.id.btnUpload);
         progressBar = view.findViewById(R.id.progressBar);
 
-        // Using standard initialization to let Firebase SDK handle the bucket from google-services.json
-        storage = FirebaseStorage.getInstance();
+        // Trying alternative bucket domain to resolve 404 errors
+        storage = FirebaseStorage.getInstance("gs://urban-threads-13a11.appspot.com");
         storageRef = storage.getReference();
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -83,10 +83,10 @@ public class UploadFragment extends Fragment {
         }
 
         String title = etTitle.getText().toString().trim();
-        String category = etCategory.getText().toString().trim();
+        String description = etDescription.getText().toString().trim();
         String tagsString = etTags.getText().toString().trim();
 
-        if (title.isEmpty() || category.isEmpty()) {
+        if (title.isEmpty() || description.isEmpty()) {
             Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -109,7 +109,7 @@ public class UploadFragment extends Fragment {
         fileRef.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot ->
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                            saveToFirestore(uri.toString(), title, category, tags);
+                            saveToFirestore(uri.toString(), title, description, tags);
                         }))
                 .addOnFailureListener(e -> {
                     btnUpload.setEnabled(true);
@@ -119,11 +119,11 @@ public class UploadFragment extends Fragment {
                 });
     }
 
-    private void saveToFirestore(String imageUrl, String title, String category, java.util.List<String> tags) {
-        String designId = UUID.randomUUID().toString();
+    private void saveToFirestore(String imageUrl, String title, String description, java.util.List<String> tags) {
+        String designId = java.util.UUID.randomUUID().toString();
         String tailorId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "anonymous";
 
-        Design design = new Design(designId, imageUrl, title, tailorId, category, tags);
+        Design design = new Design(designId, imageUrl, title, tailorId, description, tags);
 
         db.collection("designs").document(designId)
                 .set(design)

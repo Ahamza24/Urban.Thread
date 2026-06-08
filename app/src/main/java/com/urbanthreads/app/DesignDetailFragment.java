@@ -20,7 +20,7 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class DesignDetailFragment extends Fragment {
+public class  DesignDetailFragment extends Fragment {
 
     private Design design;
     private models.User tailor;
@@ -81,7 +81,7 @@ public class DesignDetailFragment extends Fragment {
 
     private void displayDesignDetails() {
         tvTitle.setText(design.getTitle());
-        tvCategory.setText(design.getCategory());
+        tvCategory.setText(design.getDescription());
 
         Glide.with(this)
                 .load(design.getImageUrl())

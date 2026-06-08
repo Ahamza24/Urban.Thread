@@ -60,38 +60,12 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Portfolio Section -->
-        <TextView
-            android:text="My Portfolio"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvPortfolio"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-
         <!-- Action Buttons -->
         <Button
             android:id="@+id/btnEditProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Edit Profile Details"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/btnAddWork"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add to Portfolio"
-            android:drawableStart="@android:drawable/ic_menu_add"
-            android:paddingStart="16dp"
             android:layout_marginBottom="8dp"/>
 
         <Button

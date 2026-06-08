@@ -179,9 +179,9 @@ public class HomeFragment extends Fragment {
     private void loadDesigns() {
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
-        // Try to load with timestamp ordering first
+        // Try to load with createdAt ordering first
         db.collection("designs")
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     if (progressBar != null) progressBar.setVisibility(View.GONE);
@@ -238,7 +238,7 @@ public class HomeFragment extends Fragment {
 
         for (Design d : designList) {
             boolean matchesTitle = d.getTitle() != null && d.getTitle().toLowerCase().contains(query);
-            boolean matchesCategory = d.getCategory() != null && d.getCategory().toLowerCase().contains(query);
+            boolean matchesDescription = d.getDescription() != null && d.getDescription().toLowerCase().contains(query);
             
             boolean matchesTags = false;
             if (d.getTags() != null) {
@@ -250,7 +250,7 @@ public class HomeFragment extends Fragment {
                 }
             }
 
-            if (matchesTitle || matchesCategory || matchesTags) {
+            if (matchesTitle || matchesDescription || matchesTags) {
                 filteredList.add(d);
             }
         }
