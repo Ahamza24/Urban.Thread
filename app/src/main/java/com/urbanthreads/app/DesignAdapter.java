@@ -37,7 +37,7 @@ public class DesignAdapter extends RecyclerView.Adapter<DesignAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Design design = designs.get(position);
         holder.txtTitle.setText(design.getTitle());
-        holder.txtCategory.setText(design.getCategory());
+        holder.txtCategory.setText(design.getDescription());
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
