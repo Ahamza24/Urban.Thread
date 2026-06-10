@@ -40,6 +40,8 @@ public class HomeFragment extends Fragment {
     private com.google.android.material.chip.ChipGroup chipGroupFilter;
     private List<models.User> allTailors = new ArrayList<>();
     private List<String> followingIds = new ArrayList<>();
+    private String userRole = "customer"; // Default
+    private String currentUserId = "";
 
     public HomeFragment() {
         // Required empty public constructor
@@ -65,22 +67,41 @@ public class HomeFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         com.google.firebase.auth.FirebaseAuth auth = com.google.firebase.auth.FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
-            db.collection("users").document(auth.getCurrentUser().getUid()).get()
+            currentUserId = auth.getCurrentUser().getUid();
+            db.collection("users").document(currentUserId).get()
                     .addOnSuccessListener(doc -> {
                         models.User user = doc.toObject(models.User.class);
                         if (user != null) {
+                            userRole = user.getRole();
                             if (user.getFollowing() != null) {
                                 followingIds = user.getFollowing();
                             }
                             
-                            // Only show fabUpload for tailors
-                            if ("tailor".equals(user.getRole())) {
+                            // Tailor vs Customer UI setup
+                            if ("tailor".equals(userRole)) {
                                 fabUpload.setVisibility(View.VISIBLE);
+                                recyclerTailors.setVisibility(View.GONE);
+                                view.findViewById(R.id.tvTailorsLabel).setVisibility(View.GONE);
+                                chipGroupFilter.setVisibility(View.GONE);
+                                ((TextView)view.findViewById(R.id.tvDesignsLabel)).setText("My Designs");
                             } else {
                                 fabUpload.setVisibility(View.GONE);
+                                recyclerTailors.setVisibility(View.VISIBLE);
+                                view.findViewById(R.id.tvTailorsLabel).setVisibility(View.VISIBLE);
+                                chipGroupFilter.setVisibility(View.VISIBLE);
+                                ((TextView)view.findViewById(R.id.tvDesignsLabel)).setText("Latest Designs");
+                                loadTailors();
                             }
+                            
+                            // Load data based on role
+                            loadDesigns();
                         }
                     });
+        } else {
+            // Not logged in: Show all designs, hide upload
+            fabUpload.setVisibility(View.GONE);
+            loadDesigns();
+            loadTailors();
         }
 
         // RecyclerView Setup - Designs
@@ -103,10 +124,6 @@ public class HomeFragment extends Fragment {
         tailorAdapter = new TailorAdapter(tailorList);
         recyclerTailors.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         recyclerTailors.setAdapter(tailorAdapter);
-
-        // Load Data
-        loadDesigns();
-        loadTailors();
 
         // Search
         searchBar.addTextChangedListener(new TextWatcher() {
@@ -147,6 +164,8 @@ public class HomeFragment extends Fragment {
 
     // Load Firestore Data - Tailors
     private void loadTailors() {
+        if ("tailor".equals(userRole)) return; // Security: Tailors cannot browse other tailors
+
         db.collection("users")
                 .whereEqualTo("role", "tailor")
                 .get()
@@ -179,13 +198,22 @@ public class HomeFragment extends Fragment {
     private void loadDesigns() {
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
-        // Try to load with createdAt ordering first
-        db.collection("designs")
-                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+        com.google.firebase.firestore.Query query = db.collection("designs");
+
+        // Split view logic: Tailors see ONLY their own designs
+        if ("tailor".equals(userRole) && !currentUserId.isEmpty()) {
+            query = query.whereEqualTo("tailorId", currentUserId);
+        }
+
+        // Try to load with createdAt ordering
+        query.orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     if (progressBar != null) progressBar.setVisibility(View.GONE);
-                    if (snapshots.isEmpty()) {
+                    if (snapshots.isEmpty() && "tailor".equals(userRole)) {
+                        // Tailor has no designs yet
+                        processDesignResults(snapshots);
+                    } else if (snapshots.isEmpty()) {
                         Log.w("HomeFragment", "Ordered query returned 0 results. Trying unordered fallback...");
                         loadDesignsUnordered();
                     } else {
@@ -199,7 +227,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadDesignsUnordered() {
-        db.collection("designs").get()
+        com.google.firebase.firestore.Query query = db.collection("designs");
+
+        if ("tailor".equals(userRole) && !currentUserId.isEmpty()) {
+            query = query.whereEqualTo("tailorId", currentUserId);
+        }
+
+        query.get()
                 .addOnSuccessListener(snapshots -> {
                     if (progressBar != null) progressBar.setVisibility(View.GONE);
                     processDesignResults(snapshots);
