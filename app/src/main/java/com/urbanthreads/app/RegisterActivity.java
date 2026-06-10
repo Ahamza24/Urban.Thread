@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -20,6 +21,7 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private EditText etName, etEmail, etPassword, etShopName, etLocation, etPhone, etDescription;
+    private TextInputLayout tilName, tilEmail, tilPassword, tilShopName, tilLocation, tilPhone, tilDescription;
     private RadioButton rbCustomer, rbTailor, rbMale, rbFemale;
     private LinearLayout tailorFields;
     private Button btnRegister;
@@ -39,6 +41,10 @@ public class RegisterActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        tilName = findViewById(R.id.tilName);
+        tilEmail = findViewById(R.id.tilEmail);
+        tilPassword = findViewById(R.id.tilPassword);
+
         rbCustomer = findViewById(R.id.rbCustomer);
         rbTailor = findViewById(R.id.rbTailor);
         rbMale = findViewById(R.id.rbMale);
@@ -49,6 +55,11 @@ public class RegisterActivity extends AppCompatActivity {
         etLocation = findViewById(R.id.etLocation);
         etPhone = findViewById(R.id.etPhone);
         etDescription = findViewById(R.id.etDescription);
+        
+        tilShopName = findViewById(R.id.tilShopName);
+        tilLocation = findViewById(R.id.tilLocation);
+        tilPhone = findViewById(R.id.tilPhone);
+        tilDescription = findViewById(R.id.tilDescription);
         
         btnRegister = findViewById(R.id.btnRegister);
         tvLogin = findViewById(R.id.tvLogin);
@@ -66,20 +77,43 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
+        // Reset errors
+        tilName.setError(null);
+        tilEmail.setError(null);
+        tilPassword.setError(null);
+        if (tilShopName != null) tilShopName.setError(null);
+
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String role = rbCustomer.isChecked() ? "customer" : "tailor";
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            return;
+        boolean hasError = false;
+
+        if (name.isEmpty()) {
+            tilName.setError("Full Name is required");
+            hasError = true;
+        }
+        if (email.isEmpty()) {
+            tilEmail.setError("Email is required");
+            hasError = true;
+        }
+        if (password.isEmpty()) {
+            tilPassword.setError("Password is required");
+            hasError = true;
+        } else if (password.length() < 6) {
+            tilPassword.setError("Password must be at least 6 characters");
+            hasError = true;
         }
 
-        if (password.length() < 6) {
-            etPassword.setError("Password must be at least 6 characters");
-            return;
+        if ("tailor".equals(role)) {
+            if (etShopName.getText().toString().trim().isEmpty()) {
+                tilShopName.setError("Shop Name is required");
+                hasError = true;
+            }
         }
+
+        if (hasError) return;
 
         progressBar.setVisibility(View.VISIBLE);
         btnRegister.setEnabled(false);
