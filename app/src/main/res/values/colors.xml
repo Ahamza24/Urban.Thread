@@ -4,6 +4,10 @@
     <color name="brand_blue">#0095F6</color>
     <color name="brand_dark_blue">#00376B</color>
 
+    <!-- Legacy Brand Names (Redirected to Blue for Build Fix) -->
+    <color name="brand_purple">#0095F6</color>
+    <color name="brand_cyan">#0095F6</color>
+
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#0095F6</color>
     <color name="purple_700">#00376B</color>

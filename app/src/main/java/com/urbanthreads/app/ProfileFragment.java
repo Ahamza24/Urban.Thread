@@ -166,45 +166,78 @@ public class ProfileFragment extends Fragment {
     }
 
     private void showEditDialog() {
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getContext());
-        View view = getLayoutInflater().inflate(R.layout.dialog_edit_tailor, null);
+        if (currentUser == null) return;
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getContext(), R.style.Theme_UrbanThread);
+        boolean isTailor = "tailor".equals(currentUser.getRole());
+        int layoutId = isTailor ? R.layout.dialog_edit_tailor : R.layout.dialog_edit_customer;
+        
+        View view = getLayoutInflater().inflate(layoutId, null);
         builder.setView(view);
 
-        EditText etShop = view.findViewById(R.id.editShopName);
-        EditText etLoc = view.findViewById(R.id.editLocation);
-        EditText etPh = view.findViewById(R.id.editPhone);
-        EditText etDesc = view.findViewById(R.id.editDescription);
+        EditText etName = view.findViewById(R.id.editName);
+        EditText etPhone = view.findViewById(R.id.editPhone);
         Button btnSave = view.findViewById(R.id.btnSaveDetails);
 
-        etShop.setText(currentUser.getShopName());
-        etLoc.setText(currentUser.getLocation());
-        etPh.setText(currentUser.getPhoneNumber());
-        etDesc.setText(currentUser.getBusinessDescription());
+        etName.setText(currentUser.getName());
+        etPhone.setText(currentUser.getPhoneNumber());
+
+        EditText etShop = null, etLoc = null, etDesc = null;
+        if (isTailor) {
+            etShop = view.findViewById(R.id.editShopName);
+            etLoc = view.findViewById(R.id.editLocation);
+            etDesc = view.findViewById(R.id.editDescription);
+
+            etShop.setText(currentUser.getShopName());
+            etLoc.setText(currentUser.getLocation());
+            etDesc.setText(currentUser.getBusinessDescription());
+        }
 
         androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        final EditText finalEtShop = etShop;
+        final EditText finalEtLoc = etLoc;
+        final EditText finalEtDesc = etDesc;
 
         btnSave.setOnClickListener(v -> {
             if (auth.getCurrentUser() == null) return;
             
-            String shop = etShop.getText().toString().trim();
-            String loc = etLoc.getText().toString().trim();
-            String ph = etPh.getText().toString().trim();
-            String desc = etDesc.getText().toString().trim();
+            String name = etName.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
 
-            if (shop.isEmpty() || loc.isEmpty() || ph.isEmpty() || desc.isEmpty()) {
-                Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            if (name.isEmpty()) {
+                Toast.makeText(getContext(), "Name is required", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("name", name);
+            updates.put("phoneNumber", phone);
+
+            if (isTailor) {
+                String shop = finalEtShop.getText().toString().trim();
+                String loc = finalEtLoc.getText().toString().trim();
+                String desc = finalEtDesc.getText().toString().trim();
+
+                if (shop.isEmpty() || loc.isEmpty()) {
+                    Toast.makeText(getContext(), "Shop name and location are required", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                updates.put("shopName", shop);
+                updates.put("location", loc);
+                updates.put("businessDescription", desc);
+            }
+
             db.collection("users").document(auth.getCurrentUser().getUid())
-                    .update("shopName", shop, "location", loc, "phoneNumber", ph, "businessDescription", desc)
+                    .update(updates)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(getContext(), "Profile updated!", Toast.LENGTH_SHORT).show();
-                        if (getView() != null && getView().getParent() != null) {
-                            loadUserProfile((View) getView().getParent()); // Refresh
+                        if (getView() != null) {
+                            loadUserProfile(getView()); // Refresh
                         }
                         dialog.dismiss();
-                    });
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         });
 
         dialog.show();
