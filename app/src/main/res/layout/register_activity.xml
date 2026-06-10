@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,6 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Create Account"
+            android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -39,14 +41,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/brand_cyan"
+            app:boxStrokeColor="@color/brand_purple"
             app:layout_constraintTop_toBottomOf="@id/tvHeader"
-            app:startIconDrawable="@android:drawable/ic_menu_myplaces">
+            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+            app:startIconTint="@color/brand_cyan">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Full Name"
+                android:textColor="@color/white"
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -56,14 +63,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/brand_cyan"
+            app:boxStrokeColor="@color/brand_purple"
             app:layout_constraintTop_toBottomOf="@id/tilName"
-            app:startIconDrawable="@android:drawable/ic_dialog_email">
+            app:startIconDrawable="@android:drawable/ic_dialog_email"
+            app:startIconTint="@color/brand_cyan">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email Address"
+                android:textColor="@color/white"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,15 +85,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/brand_cyan"
+            app:boxStrokeColor="@color/brand_purple"
             app:layout_constraintTop_toBottomOf="@id/tilEmail"
             app:passwordToggleEnabled="true"
-            app:startIconDrawable="@android:drawable/ic_lock_idle_lock">
+            app:passwordToggleTint="@color/brand_cyan"
+            app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+            app:startIconTint="@color/brand_cyan">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Password"
+                android:textColor="@color/white"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -91,6 +109,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Select your role:"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -110,6 +129,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:checked="true"
+                android:buttonTint="@color/brand_cyan"
+                android:textColor="@color/white"
                 android:text="Customer" />
 
             <RadioButton
@@ -117,6 +138,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:buttonTint="@color/brand_cyan"
+                android:textColor="@color/white"
                 android:text="Tailor" />
         </RadioGroup>
 
@@ -135,13 +158,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:startIconDrawable="@android:drawable/ic_menu_preferences">
+                android:textColorHint="@color/white"
+                app:hintTextColor="@color/brand_cyan"
+                app:boxStrokeColor="@color/brand_purple"
+                app:startIconDrawable="@android:drawable/ic_menu_preferences"
+                app:startIconTint="@color/brand_cyan">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etShopName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Shop Name" />
+                    android:hint="Shop Name"
+                    android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -150,13 +178,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:startIconDrawable="@android:drawable/ic_dialog_map">
+                android:textColorHint="@color/white"
+                app:hintTextColor="@color/brand_cyan"
+                app:boxStrokeColor="@color/brand_purple"
+                app:startIconDrawable="@android:drawable/ic_dialog_map"
+                app:startIconTint="@color/brand_cyan">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Location (City, Street)" />
+                    android:hint="Location (City, Street)"
+                    android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -165,13 +198,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:startIconDrawable="@android:drawable/ic_menu_call">
+                android:textColorHint="@color/white"
+                app:hintTextColor="@color/brand_cyan"
+                app:boxStrokeColor="@color/brand_purple"
+                app:startIconDrawable="@android:drawable/ic_menu_call"
+                app:startIconTint="@color/brand_cyan">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Phone Number"
+                    android:textColor="@color/white"
                     android:inputType="phone" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -181,13 +219,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:startIconDrawable="@android:drawable/ic_menu_edit">
+                android:textColorHint="@color/white"
+                app:hintTextColor="@color/brand_cyan"
+                app:boxStrokeColor="@color/brand_purple"
+                app:startIconDrawable="@android:drawable/ic_menu_edit"
+                app:startIconTint="@color/brand_cyan">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Business Description" />
+                    android:hint="Business Description"
+                    android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -195,6 +238,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Specialization:"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
             <RadioGroup
@@ -210,6 +254,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:checked="true"
+                    android:buttonTint="@color/brand_cyan"
+                    android:textColor="@color/white"
                     android:text="Male Clothing" />
 
                 <RadioButton
@@ -217,12 +263,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:buttonTint="@color/brand_cyan"
+                    android:textColor="@color/white"
                     android:text="Female Clothing" />
             </RadioGroup>
         </LinearLayout>
 
         <Button
             android:id="@+id/btnRegister"
+            style="@style/BrandButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
@@ -238,7 +287,8 @@
             android:padding="8dp"
             android:text="Already have an account? Login"
             android:textAlignment="center"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="@color/brand_cyan"
+            android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/btnRegister" />
 
         <ProgressBar
