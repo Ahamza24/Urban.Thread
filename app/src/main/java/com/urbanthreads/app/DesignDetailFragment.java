@@ -19,6 +19,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.List;
 
 public class  DesignDetailFragment extends Fragment {
 
@@ -32,9 +33,14 @@ public class  DesignDetailFragment extends Fragment {
     private ChipGroup cgTags;
     private Button btnOrder;
 
+    private String userRole = "customer";
+    private boolean isFollowing = false;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
         if (getArguments() != null) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 design = getArguments().getSerializable("design", Design.class);
@@ -57,15 +63,21 @@ public class  DesignDetailFragment extends Fragment {
         cgTags = view.findViewById(R.id.cgDetailTags);
         btnOrder = view.findViewById(R.id.btnOrderNow);
 
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-
         if (design != null) {
             displayDesignDetails();
             fetchTailorInfo();
         }
 
-        btnOrder.setOnClickListener(v -> handleHireAction());
+        checkUserRoleAndStatus();
+
+        btnOrder.setOnClickListener(v -> {
+            if ("tailor".equals(userRole)) {
+                // Navigate to My Designs (Home)
+                NavHostFragment.findNavController(this).popBackStack(R.id.nav_home, false);
+            } else {
+                handleFollowAction();
+            }
+        });
 
         view.findViewById(R.id.layoutTailorInfo).setOnClickListener(v -> {
             if (tailor != null) {
@@ -110,28 +122,56 @@ public class  DesignDetailFragment extends Fragment {
                 });
     }
 
-    private void handleHireAction() {
+    private void checkUserRoleAndStatus() {
         if (auth.getCurrentUser() == null) {
-            Toast.makeText(getContext(), "Please login to hire a tailor", Toast.LENGTH_SHORT).show();
+            btnOrder.setText("Follow Tailor");
             return;
         }
 
-        // Logic for hiring: For now, we'll just show a success toast or navigate to a chat/order screen
-        // In a real app, this would create an 'order' or 'inquiry' record in Firestore
-        String customerId = auth.getCurrentUser().getUid();
+        String uid = auth.getCurrentUser().getUid();
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        userRole = doc.getString("role");
+                        List<String> following = (List<String>) doc.get("following");
+                        isFollowing = following != null && following.contains(design.getTailorId());
+
+                        if ("tailor".equals(userRole)) {
+                            btnOrder.setText("View My Designs");
+                        } else {
+                            updateFollowButton();
+                        }
+                    }
+                });
+    }
+
+    private void updateFollowButton() {
+        if (isFollowing) {
+            btnOrder.setText("Following");
+            btnOrder.setEnabled(false);
+            btnOrder.setAlpha(0.6f);
+        } else {
+            btnOrder.setText("Follow Tailor");
+            btnOrder.setEnabled(true);
+            btnOrder.setAlpha(1.0f);
+        }
+    }
+
+    private void handleFollowAction() {
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(getContext(), "Please login to follow tailors", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String uid = auth.getCurrentUser().getUid();
         String tailorId = design.getTailorId();
 
-        java.util.Map<String, Object> order = new java.util.HashMap<>();
-        order.put("designId", design.getId());
-        order.put("customerId", customerId);
-        order.put("tailorId", tailorId);
-        order.put("status", "pending");
-        order.put("timestamp", com.google.firebase.Timestamp.now());
-
-        db.collection("orders").add(order)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(), "Hire request sent to " + (tailor != null ? tailor.getName() : "tailor"), Toast.LENGTH_LONG).show();
-                    // Optionally navigate to an 'Orders' screen
+        db.collection("users").document(uid)
+                .update("following", com.google.firebase.firestore.FieldValue.arrayUnion(tailorId))
+                .addOnSuccessListener(aVoid -> {
+                    isFollowing = true;
+                    updateFollowButton();
+                    Toast.makeText(getContext(), "Now following " + (tailor != null ? tailor.getName() : "tailor"), Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }

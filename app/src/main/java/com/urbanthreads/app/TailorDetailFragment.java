@@ -44,10 +44,14 @@ public class TailorDetailFragment extends Fragment {
         // Required empty public constructor
     }
 
+    private String userRole = "customer";
+
     @Override
     @SuppressWarnings("deprecation")
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
         if (getArguments() != null) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 tailor = getArguments().getSerializable("tailor", models.User.class);
@@ -56,8 +60,6 @@ public class TailorDetailFragment extends Fragment {
             }
             tailorId = getArguments().getString("tailorId");
         }
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -74,9 +76,6 @@ public class TailorDetailFragment extends Fragment {
         btnHire = view.findViewById(R.id.btnHireNowDetail);
 
         if (tailor != null) {
-            // If tailorId wasn't passed, we might need it from the object or another way
-            // For now assume it was passed or the object is enough for display.
-            
             tvShopName.setText(tailor.getShopName() != null ? tailor.getShopName() : tailor.getName());
             tvLocation.setText(tailor.getLocation() != null ? tailor.getLocation() : "No location specified");
             tvBio.setText(tailor.getBusinessDescription() != null ? tailor.getBusinessDescription() : "No bio available");
@@ -98,7 +97,7 @@ public class TailorDetailFragment extends Fragment {
                 recyclerPortfolio.setAdapter(portfolioAdapter);
             }
             
-            checkFollowStatus();
+            checkUserStatus();
         }
 
         view.findViewById(R.id.btnMessage).setOnClickListener(v -> {
@@ -110,7 +109,14 @@ public class TailorDetailFragment extends Fragment {
         });
 
         btnFollow.setOnClickListener(v -> toggleFollow());
-        btnHire.setOnClickListener(v -> handleHireAction());
+        btnHire.setOnClickListener(v -> {
+            if ("tailor".equals(userRole)) {
+                // Navigate back to Home (where they see their designs)
+                NavHostFragment.findNavController(this).popBackStack(R.id.nav_home, false);
+            } else {
+                toggleFollow();
+            }
+        });
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> {
@@ -120,30 +126,46 @@ public class TailorDetailFragment extends Fragment {
         return view;
     }
 
-    private void checkFollowStatus() {
-        if (auth.getCurrentUser() == null || tailorId == null) {
+    private void checkUserStatus() {
+        if (auth.getCurrentUser() == null) {
             btnFollow.setVisibility(View.GONE);
+            btnHire.setText("Follow Tailor");
             return;
         }
 
-        db.collection("users").document(auth.getCurrentUser().getUid()).get()
+        String uid = auth.getCurrentUser().getUid();
+        db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     models.User user = documentSnapshot.toObject(models.User.class);
-                    if (user != null && user.getFollowing() != null) {
-                        isFollowing = user.getFollowing().contains(tailorId);
-                        updateFollowButton();
+                    if (user != null) {
+                        userRole = user.getRole();
+                        if (user.getFollowing() != null) {
+                            isFollowing = user.getFollowing().contains(tailorId);
+                        }
+
+                        if ("tailor".equals(userRole)) {
+                            // Tailor viewing a profile
+                            btnFollow.setVisibility(View.GONE);
+                            btnHire.setText("View My Designs");
+                        } else {
+                            // Customer viewing a profile
+                            btnFollow.setVisibility(View.GONE); // Use main button for follow
+                            updateFollowButton();
+                        }
                     }
                 });
     }
 
     private void updateFollowButton() {
         if (isFollowing) {
-            btnFollow.setText("Following");
-            btnFollow.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
+            btnHire.setText("Following");
+            btnHire.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
+            btnHire.setEnabled(false);
         } else {
-            btnFollow.setText("Follow");
-            btnFollow.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+            btnHire.setText("Follow Tailor");
+            btnHire.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                     androidx.core.content.ContextCompat.getColor(requireContext(), R.color.purple_500)));
+            btnHire.setEnabled(true);
         }
     }
 
@@ -180,34 +202,5 @@ public class TailorDetailFragment extends Fragment {
         } catch (Exception e) {
             Toast.makeText(getContext(), "Could not open WhatsApp", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void handleHireAction() {
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(getContext(), "Please login to hire a tailor", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (tailorId == null && tailor != null) {
-            // Try to find the tailorId from the database if not passed
-            // For now, let's assume it should have been passed or we can't proceed reliably
-            Toast.makeText(getContext(), "Error: Tailor ID missing", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String customerId = auth.getCurrentUser().getUid();
-
-        java.util.Map<String, Object> order = new java.util.HashMap<>();
-        order.put("customerId", customerId);
-        order.put("tailorId", tailorId);
-        order.put("status", "pending");
-        order.put("type", "general_hire");
-        order.put("timestamp", com.google.firebase.Timestamp.now());
-
-        db.collection("orders").add(order)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(), "Hire request sent to " + (tailor != null ? tailor.getShopName() : "tailor"), Toast.LENGTH_LONG).show();
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }
